@@ -50,7 +50,17 @@ SCOPES = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds = Credentials.from_service_account_file("google_credentials.json", scopes=SCOPES)
+
+# Load Google credentials from environment variable (for Railway deployment)
+# or fall back to the local file (for local development)
+import json
+google_creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+if google_creds_json:
+    creds_dict = json.loads(google_creds_json)
+    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+else:
+    creds = Credentials.from_service_account_file("google_credentials.json", scopes=SCOPES)
+
 gc = gspread.authorize(creds)
 sheet = gc.open_by_key(os.environ["GOOGLE_SHEET_ID"])
 
